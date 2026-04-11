@@ -1,0 +1,2 @@
+curl -sS -X POST "http://localhost:5001/customer/register" -H 'Content-Type: application/json' -d '{"username":"labuser1775940862","password":"pwd12345"}'
+{"message":"Account created"}

@@ -15,7 +15,7 @@ const isValid = (username)=>{ //returns boolean
 }
 
 const authenticatedUser = (username,password)=>{ //returns boolean
-  const user = users.findOne(user => user.username == username);
+  const user = users.find(user => user.username == username);
   if (user?.password == password) {
     return true
   } else {
@@ -48,22 +48,24 @@ regd_users.post("/register", (req, res) => {
 regd_users.post("/login", (req,res) => {
   const { username, password } = req.body
   if (authenticatedUser(username, password)) {
-    const token = jwt.sign({ username }, "privateKey", { algorithm: 'RS256' });
+    const token = jwt.sign({ username }, "privateKey", { expiresIn: "1h" });
     req.session.jwt = token;
-    return res.status(200)
+    return res.status(200).json({message: "Login successful"});
   } else {
       return res.status(401).json({message: "Invalid credentials"});
   }
 });
 
+const privateKey = "privateKey"
+
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  const token = req.token
+  const token = req.session.jwt
   if (!token) {
     return res.sendStatus(401)
   }
 
-  jwt.verify(token, "privateKey", options, function(err, decoded) {
+  jwt.verify(token, privateKey, { algorithms: ['HS256'] }, function(err, decoded) {
     const { username } = decoded
     if (err || !username) {
       return res.sendStatus(401)
@@ -73,8 +75,8 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     if (!books[isbn]) {
       return res.status(400)
     }
-    books[isbn]?.review = {
-      ...books[isbn]?.review,
+    books[isbn].review = {
+      ...books[isbn].review,
       [username]: body
     }
     return res.status(201).json({
@@ -85,12 +87,12 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 
 // Delete a book review
 regd_users.delete("/auth/review/:isbn", (req, res) => {
-  const token = req.token
+  const token = req.session.jwt
   if (!token) {
     return res.sendStatus(401)
   }
 
-  jwt.verify(token, "privateKey", options, function(err, decoded) {
+  jwt.verify(token, privateKey, { algorithms: ['HS256'] }, function(err, decoded) {
     const { username } = decoded
     if (err || !username) {
       return res.sendStatus(401)

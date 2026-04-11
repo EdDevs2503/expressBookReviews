@@ -1,4 +1,8 @@
 # Distribution / packaging
 node_modules
 
+# Local JWT key material (regenerate with final_project/keys/regenerate-keys.sh)
+final_project/keys/jwt-private.pem
+final_project/keys/jwt-public.pem
+final_project/keys/jwt-hs256-secret.txt
 

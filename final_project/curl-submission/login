@@ -1,0 +1,2 @@
+curl -sS -c "./curl-submission/.lab-cookies" -X POST "http://localhost:5001/customer/login" -H 'Content-Type: application/json' -d '{"username":"labuser1775940862","password":"pwd12345"}'
+{"message":"Login successful"}

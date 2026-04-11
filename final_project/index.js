@@ -12,11 +12,23 @@ app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUni
 
 app.use("/customer/auth/*", function auth(req,res,next){
 //Write the authenication mechanism here
+    const token = req.session.jwt
+    jwt.verify(token, 'privateKey', function(err, decoded) {
+        if (err) {
+            console.log("HAY BOBO")
+            return res.sendStatus(401)
+        }
+        next()
+    });
+
 });
- 
-const PORT =5000;
+
+const PORT =5001;
 
 app.use("/customer", customer_routes);
 app.use("/", genl_routes);
 
-app.listen(PORT,()=>console.log("Server is running"));
+module.exports = app;
+if (require.main === module) {
+  app.listen(PORT, () => console.log("Server is running"));
+}

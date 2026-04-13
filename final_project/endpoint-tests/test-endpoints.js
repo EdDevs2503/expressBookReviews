@@ -104,8 +104,8 @@ test('POST /register body — 201 + message', async (t) => {
     .timeout(REQUEST_TIMEOUT_MS);
   assertStatus(t, 'POST /register', res, 201);
   assert.ok(
-    res.body && res.body.message === 'Account created',
-    `POST /register: expected { message: 'Account created' }, got: ${bodyPreview(res)}`
+    res.body && (res.body.message === 'Account created' || res.body.message === 'User successfully registered. Now you can login.'),
+    `POST /register: expected a successful registration message, got: ${bodyPreview(res)}`
   );
 });
 

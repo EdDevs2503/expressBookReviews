@@ -22,7 +22,7 @@ public_users.post("/register", (req, res) => {
     username,
     password
   });
-  return res.status(201).json({ message: "Account created" });
+  return res.status(201).json({ message: "User successfully registered. Now you can login." });
 });
 
 const getBooks = () => {
@@ -35,7 +35,7 @@ const getBooks = () => {
 public_users.get('/', function (req, res) {
   getBooks()
     .then(syncBooks => {
-      return res.status(200).json(JSON.stringify(syncBooks, null, 4));
+      return res.status(200).json(syncBooks);
     })
 });
 
@@ -44,7 +44,7 @@ public_users.get('/isbn/:isbn', function (req, res) {
   const isbn = req.params.isbn
   getBooks()
     .then(syncBooks => {
-      return res.status(200).json(JSON.stringify(syncBooks[isbn]));
+      return res.status(200).json(syncBooks[isbn]);
     })
 });
 
@@ -55,7 +55,7 @@ public_users.get('/author/:author', function (req, res) {
     .then(syncBooks => {
       const books = Object.values(syncBooks)
       const book = books.find(book => book.author == author)
-      return res.status(200).json(JSON.stringify(book));
+      return res.status(200).json(book);
     })
 });
 
@@ -64,41 +64,56 @@ public_users.get('/title/:title', function (req, res) {
   const title = req.params.title
   const booksArr = Object.values(books)
   const book = booksArr.find(book => book.title == title)
-  return res.status(200).json(JSON.stringify(book));
+  return res.status(200).json(book);
 });
 
 //  Get book review
 public_users.get('/review/:isbn', function (req, res) {
   const isbn = req.params.isbn
   const review = books[isbn]?.review || {}
-  return res.status(200).json(JSON.stringify(review));
+  return res.status(200).json(review);
 });
 
 
 const axiosImplementation = async () => {
   try {
-    const {data: allBooks} = await axios({
+    const { data: allBooks } = await axios({
       method: 'get',
       url: 'http://localhost:5001/',
     })
-    const {data: bookByIsbn} = await axios({
+    console.log("allBooks: ", allBooks)
+  } catch (error) {
+    console.log("allBooks error: ", error)
+  }
+
+  try {
+    const { data: bookByIsbn } = await axios({
       method: 'get',
       url: 'http://localhost:5001/isbn/2',
     })
-    const {data: bookByAuthor} = await axios({
+    console.log("bookByIsbn: ", bookByIsbn)
+  } catch (error) {
+    console.log("bookByIsbn error: ", error)
+  }
+
+  try {
+    const { data: bookByAuthor } = await axios({
       method: 'get',
       url: 'http://localhost:5001/author/Samuel%20Beckett',
     })
-    const {data: bookByTittle} = await axios({
+    console.log("bookByAuthor: ", bookByAuthor)
+  } catch (error) {
+    console.log("bookByAuthor error: ", error)
+  }
+
+  try {
+    const { data: bookByTittle } = await axios({
       method: 'get',
       url: 'http://localhost:5001/title/The%20Divine%20Comedy',
     })
-    console.log("allBooks: ", allBooks)
-    console.log("bookByIsbn: ", bookByIsbn)
-    console.log("bookByAuthor: ", bookByAuthor)
     console.log("bookByTittle: ", bookByTittle)
   } catch (error) {
-    console.log(error)
+    console.log("bookByTittle error: ", error)
   }
 }
 

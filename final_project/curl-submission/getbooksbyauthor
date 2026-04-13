@@ -1,2 +1,2 @@
 curl -sS -g "http://localhost:5001/author/Chinua%20Achebe"
-"{\"author\":\"Chinua Achebe\",\"title\":\"Things Fall Apart\",\"reviews\":{},\"review\":{\"seed_review_1776087370_18931\":{\"review\":\"Sample review for submission — book 1.\"}}}"
+{"author":"Chinua Achebe","title":"Things Fall Apart","reviews":{}}

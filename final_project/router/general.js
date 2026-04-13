@@ -40,37 +40,90 @@ public_users.get('/', function (req, res) {
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn', function (req, res) {
+public_users.get('/isbn/:isbn', async function (req, res) {
   const isbn = req.params.isbn
-  getBooks()
-    .then(syncBooks => {
-      return res.status(200).json(syncBooks[isbn]);
-    })
+  try {
+    const { data: allBooks } = await axios.get("http://localhost:5001/");
+    const book = allBooks[isbn];
+    if (!book) {
+      return res.status(404).json({ message: `ISBN ${isbn} not found` });
+    }
+    return res.status(200).json(book);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to retrieve books by ISBN",
+      error: error.message
+    });
+  }
 });
 
 // Get book details based on author
-public_users.get('/author/:author', function (req, res) {
+public_users.get('/author/:author', async function (req, res) {
   const author = req.params.author
-  getBooks()
-    .then(syncBooks => {
-      const books = Object.values(syncBooks)
-      const book = books.find(book => book.author == author)
-      return res.status(200).json(book);
-    })
+  try {
+    const { data: allBooks } = await axios.get("http://localhost:5001/");
+    const booksArr = Object.values(allBooks);
+    const matches = booksArr.filter(book => book.author == author);
+    return res.status(200).json(matches);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to retrieve books by author",
+      error: error.message
+    });
+  }
 });
 
 // Get all books based on title
-public_users.get('/title/:title', function (req, res) {
+public_users.get('/title/:title', async function (req, res) {
   const title = req.params.title
-  const booksArr = Object.values(books)
-  const book = booksArr.find(book => book.title == title)
-  return res.status(200).json(book);
+  try {
+    const { data: allBooks } = await axios.get("http://localhost:5001/");
+    const booksArr = Object.values(allBooks);
+    const matches = booksArr.filter(book => book.title == title);
+    return res.status(200).json(matches);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to retrieve books by title",
+      error: error.message
+    });
+  }
+});
+
+// Add or modify a book review
+public_users.put('/review/:isbn', function (req, res) {
+  const isbn = req.params.isbn;
+  const reviewText = req.query.review || req.body?.review || req.body;
+  if (!books[isbn]) {
+    return res.status(404).json({ message: `ISBN ${isbn} not found` });
+  }
+  const reviewUser = req.body?.username || "anonymous";
+  books[isbn].reviews = {
+    ...(books[isbn].reviews || {}),
+    [reviewUser]: reviewText
+  };
+  return res.status(200).json({
+    message: `Review for ISBN ${isbn} added or updated`,
+    reviews: books[isbn].reviews
+  });
+});
+
+// Delete a book review
+public_users.delete('/review/:isbn', function (req, res) {
+  const isbn = req.params.isbn;
+  if (!books[isbn]) {
+    return res.status(404).json({ message: `ISBN ${isbn} not found` });
+  }
+  const reviewUser = req.body?.username || "anonymous";
+  delete books[isbn]?.reviews?.[reviewUser];
+  return res.status(200).json({
+    message: `Review for ISBN ${isbn} deleted`
+  });
 });
 
 //  Get book review
 public_users.get('/review/:isbn', function (req, res) {
   const isbn = req.params.isbn
-  const review = books[isbn]?.review || {}
+  const review = books[isbn]?.reviews || {}
   return res.status(200).json(review);
 });
 

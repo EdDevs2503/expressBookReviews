@@ -42,9 +42,9 @@ function assertStatus(t, name, res, expected) {
   }
 }
 
-test('GET / — list books (JSON payload, lab uses 300)', async (t) => {
+test('GET / — list books (JSON payload, now 200)', async (t) => {
   const res = await request(app).get('/').timeout(REQUEST_TIMEOUT_MS);
-  assertStatus(t, 'GET /', res, 300);
+  assertStatus(t, 'GET /', res, 200);
   const raw = typeof res.body === 'string' ? res.body : JSON.stringify(res.body);
   assert.ok(
     raw.includes('Chinua Achebe') || raw.includes('Things Fall Apart'),
@@ -54,7 +54,7 @@ test('GET / — list books (JSON payload, lab uses 300)', async (t) => {
 
 test('GET /isbn/1 — single book', async (t) => {
   const res = await request(app).get('/isbn/1').timeout(REQUEST_TIMEOUT_MS);
-  assertStatus(t, 'GET /isbn/1', res, 300);
+  assertStatus(t, 'GET /isbn/1', res, 200);
   const raw = typeof res.body === 'string' ? res.body : JSON.stringify(res.body);
   assert.ok(raw.includes('Chinua'), `GET /isbn/1: expected author in body, got: ${bodyPreview(res)}`);
 });
@@ -63,7 +63,7 @@ test('GET /author/Chinua Achebe', async (t) => {
   const res = await request(app)
     .get('/author/Chinua%20Achebe')
     .timeout(REQUEST_TIMEOUT_MS);
-  assertStatus(t, 'GET /author', res, 300);
+  assertStatus(t, 'GET /author', res, 200);
   const raw = typeof res.body === 'string' ? res.body : JSON.stringify(res.body);
   assert.ok(
     raw.includes('Chinua') || raw.includes('Achebe'),
@@ -75,7 +75,7 @@ test('GET /title/Things Fall Apart', async (t) => {
   const res = await request(app)
     .get('/title/Things%20Fall%20Apart')
     .timeout(REQUEST_TIMEOUT_MS);
-  assertStatus(t, 'GET /title', res, 300);
+  assertStatus(t, 'GET /title', res, 200);
   const raw = typeof res.body === 'string' ? res.body : JSON.stringify(res.body);
   assert.ok(
     raw.includes('Things Fall Apart') || raw.includes('Chinua'),
@@ -85,34 +85,34 @@ test('GET /title/Things Fall Apart', async (t) => {
 
 test('GET /review/1 — reviews object', async (t) => {
   const res = await request(app).get('/review/1').timeout(REQUEST_TIMEOUT_MS);
-  assertStatus(t, 'GET /review/1', res, 300);
+  assertStatus(t, 'GET /review/1', res, 200);
 });
 
-test('POST /register — public stub (300)', async (t) => {
+test('POST /register — register user (201)', async (t) => {
   const res = await request(app)
     .post('/register')
     .send({ username: 'x', password: 'y' })
     .timeout(REQUEST_TIMEOUT_MS);
-  assertStatus(t, 'POST /register', res, 300);
+  assertStatus(t, 'POST /register', res, 201);
 });
 
-test('POST /customer/register — 201 + message', async (t) => {
+test('POST /register body — 201 + message', async (t) => {
   const u = `u_${Date.now()}_${Math.random().toString(16).slice(2)}`;
   const res = await request(app)
-    .post('/customer/register')
+    .post('/register')
     .send({ username: u, password: 'pw12345' })
     .timeout(REQUEST_TIMEOUT_MS);
-  assertStatus(t, 'POST /customer/register', res, 201);
+  assertStatus(t, 'POST /register', res, 201);
   assert.ok(
     res.body && res.body.message === 'Account created',
-    `POST /customer/register: expected { message: 'Account created' }, got: ${bodyPreview(res)}`
+    `POST /register: expected { message: 'Account created' }, got: ${bodyPreview(res)}`
   );
 });
 
 test('POST /customer/login — 200 + JSON body (must finish response)', async (t) => {
   const u = `login_${Date.now()}_${Math.random().toString(16).slice(2)}`;
   await request(app)
-    .post('/customer/register')
+    .post('/register')
     .send({ username: u, password: 'pw12345' })
     .timeout(REQUEST_TIMEOUT_MS);
   const res = await request(app)
@@ -131,7 +131,7 @@ test('PUT + DELETE /customer/auth/review/1 — session + JWT (same agent)', asyn
   const agent = request.agent(app);
 
   const reg = await agent
-    .post('/customer/register')
+    .post('/register')
     .send({ username: u, password: 'pw12345' })
     .timeout(REQUEST_TIMEOUT_MS);
   logResult(t, 'register (agent)', reg);

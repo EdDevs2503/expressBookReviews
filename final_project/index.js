@@ -15,7 +15,6 @@ app.use("/customer/auth/*", function auth(req,res,next){
     const token = req.session.jwt
     jwt.verify(token, 'privateKey', function(err, decoded) {
         if (err) {
-            console.log("HAY BOBO")
             return res.sendStatus(401)
         }
         next()

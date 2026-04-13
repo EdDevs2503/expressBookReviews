@@ -24,26 +24,6 @@ const authenticatedUser = (username,password)=>{ //returns boolean
 //write code to check if username and password match the one we have in records.
 }
 
-// register
-regd_users.post("/register", (req, res) => {
-    const { username, password } = req.body
-    if (!username || !password) {
-      res.status(400).json({
-        message: "Bad request - username and password are required"
-      })
-    }
-    if (!isValid(username)) {
-      res.status(401).json({
-        message: "Username already taken"
-      })
-    }
-    users.push({
-      username,
-      password
-    });
-    return res.status(201).json({message: "Account created"});
-});
-
 //only registered users can login
 regd_users.post("/login", (req,res) => {
   const { username, password } = req.body

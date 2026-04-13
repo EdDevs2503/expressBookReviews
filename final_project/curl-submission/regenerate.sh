@@ -28,6 +28,14 @@ node index.js > /tmp/curl-lab-server.log 2>&1 &
 sleep 1
 
 U="labuser$(date +%s)"
+# Seed ISBN 1 with a review so GET /review/1 is not "{}" (in-memory books shared by one server process).
+U_SEED="seed_review_$(date +%s)_$$"
+curl -sS -X POST "$B/register" -H 'Content-Type: application/json' \
+  -d "{\"username\":\"$U_SEED\",\"password\":\"pwd12345\"}" >/dev/null || true
+curl -sS -c "$COOKIE" -X POST "$B/customer/login" -H 'Content-Type: application/json' \
+  -d "{\"username\":\"$U_SEED\",\"password\":\"pwd12345\"}" >/dev/null || true
+curl -sS -b "$COOKIE" -X PUT "$B/customer/auth/review/1" -H 'Content-Type: application/json' \
+  -d '{"review":"Sample review for submission — book 1."}' >/dev/null || true
 
 # Lab sample: line 1 = curl command (no leading $), following lines = full output.
 write_curl() {
@@ -43,7 +51,7 @@ write_curl getbooksbyISBN "curl -sS \"$B/isbn/1\""
 write_curl getbooksbyauthor "curl -sS -g \"$B/author/Chinua%20Achebe\""
 write_curl getbooksbytitle "curl -sS -g \"$B/title/Things%20Fall%20Apart\""
 write_curl getbookreview "curl -sS \"$B/review/1\""
-write_curl register "curl -sS -X POST \"$B/customer/register\" -H 'Content-Type: application/json' -d '{\"username\":\"$U\",\"password\":\"pwd12345\"}'"
+write_curl register "curl -sS -X POST \"$B/register\" -H 'Content-Type: application/json' -d '{\"username\":\"$U\",\"password\":\"pwd12345\"}'"
 write_curl login "curl -sS -c \"$COOKIE_REL\" -X POST \"$B/customer/login\" -H 'Content-Type: application/json' -d '{\"username\":\"$U\",\"password\":\"pwd12345\"}'"
 # Task 8: review as query param; session cookie from login
 write_curl reviewadded "curl -sS -b \"$COOKIE_REL\" -X PUT \"$B/customer/auth/review/1?review=Great%20book\" -H 'Content-Type: application/json' -d '{}'"
